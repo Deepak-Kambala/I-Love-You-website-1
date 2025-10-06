@@ -136,7 +136,38 @@
       overflow: hidden;
     }
 
-    #enterButton::before {
+    #enterButtonGame {
+      padding: 20px 50px;
+      font-size: 1.3rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+      color: white;
+      border: 3px solid rgba(255, 255, 255, 0.5);
+      border-radius: 50px;
+      box-shadow: 0 10px 40px rgba(255, 107, 157, 0.5),
+        0 0 20px rgba(255, 255, 255, 0.3),
+        inset 0 1px 3px rgba(255, 255, 255, 0.4);
+      transition: all 0.3s ease;
+      font-family: 'Poppins', sans-serif;
+      letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #enterButtonGame::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    #enterButtonGame::before {
       content: '';
       position: absolute;
       top: 50%;
@@ -154,7 +185,19 @@
       height: 300px;
     }
 
+    #enterButtonGame:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
     #enterButton:hover {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 15px 50px rgba(255, 107, 157, 0.7),
+        0 0 30px rgba(255, 255, 255, 0.5),
+        inset 0 1px 3px rgba(255, 255, 255, 0.6);
+      border-color: white;
+    }
+    #enterButtonGame:hover {
       transform: translateY(-5px) scale(1.05);
       box-shadow: 0 15px 50px rgba(255, 107, 157, 0.7),
         0 0 30px rgba(255, 255, 255, 0.5),
@@ -163,6 +206,9 @@
     }
 
     #enterButton:active {
+      transform: translateY(-2px) scale(1.02);
+    }
+    #enterButtonGame:active {
       transform: translateY(-2px) scale(1.02);
     }
 
@@ -393,6 +439,9 @@
     <button id="enterButton">
       <span class="button-text">✨ Unlock The Magic ✨</span>
     </button>
+    <button id="enterButtonGame">
+      <span class="button-text">✨ Check your love ✨</span>
+    </button>
   </div>
 
    <!-- Popup Overlay -->
@@ -452,12 +501,15 @@
 
     const overlay = document.getElementById('popupOverlay');
     const openBtn = document.getElementById('enterButton');
+    const openBtnGame = document.getElementById('enterButtonGame');
     const closeBtn = document.getElementById('closePopup');
     const continueBtn = document.getElementById('continueButton');
     const nameInput = document.getElementById('nameInput');
+    let type = '';
 
     openBtn.addEventListener('click', () => {
       overlay.style.display = 'flex';
+      type = 'message';
     });
 
     closeBtn.addEventListener('click', () => {
@@ -466,12 +518,23 @@
 
     continueBtn.addEventListener('click', () => {
       const name = nameInput.value.trim();
-      if (name) {
+      if (name && type === 'message') {
         window.location.href = `page2.htm?name=${encodeURIComponent(name)}`;
+      } else if (name && type === 'game') {
+        window.location.href = `game.htm?name=${encodeURIComponent(name)}`;
       } else {
         nameInput.placeholder = "Please enter a name 💞";
       }
     });
+
+    openBtnGame.addEventListener('click', () => {
+      overlay.style.display = 'flex';
+      type = 'game';
+    });
+
+    
+
+  
   </script>
 
 </body>
