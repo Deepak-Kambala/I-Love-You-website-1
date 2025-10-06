@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Love Catch — Simple Love Game</title>
+  <style>
+    :root{
+      --g1: #ff9a9e;
+      --g2: #fad0c4;
+      --g3: #fbc2eb;
+      --g4: #a18cd1;
+    }
+
+    /* full-screen layout */
+    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial}
+    .wrap{height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+
+    /* animated gradient background that will also be nudged by JS */
+    .bg{
+      position:absolute;inset:0;z-index:0;transition:background 1s linear;
+      background: linear-gradient(135deg,var(--g1),var(--g2));
+      will-change:background;
+      animation: slowShift 20s linear infinite;
+      filter: saturate(1.05) contrast(1.02);
+    }
+
+    @keyframes slowShift{
+      0%{filter: hue-rotate(0deg)}
+      50%{filter: hue-rotate(45deg)}
+      100%{filter: hue-rotate(0deg)}
+    }
+
+    /* game card */
+    .game{
+      position:relative;z-index:1;width:min(960px,94vw);height:min(640px,86vh);
+      background:rgba(255,255,255,0.06);backdrop-filter: blur(6px);
+      border-radius:16px;padding:16px;box-shadow:0 8px 40px rgba(0,0,0,0.25);
+      display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(255,255,255,0.08)
+    }
+
+    header{display:flex;justify-content:space-between;align-items:center;color:white}
+    h1{font-size:1.2rem;margin:0}
+    .controls{display:flex;gap:12px;align-items:center}
+    .btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:white;padding:8px 12px;border-radius:8px;cursor:pointer}
+
+    /* play area */
+    .stage{position:relative;flex:1;margin-top:12px;border-radius:12px;overflow:hidden;border:1px dashed rgba(255,255,255,0.06)}
+
+    /* heart style using css shape */
+    .heart{
+      position:absolute;width:44px;height:40px;transform:translate(-50%,-50%) scale(1);
+      cursor:pointer;touch-action:none;user-select:none;z-index:2;pointer-events:auto;
+      transition:transform 120ms ease-out, opacity 150ms linear;
+    }
+    .heart .shape{
+      position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-45deg);
+      width:28px;height:28px;background:linear-gradient(180deg,#ff6bcb,#ff3356);border-radius:4px;
+    }
+    .heart .shape::before, .heart .shape::after{
+      content:"";position:absolute;width:28px;height:28px;background:inherit;border-radius:50%;
+    }
+    .heart .shape::before{left:-14px;top:0}
+    .heart .shape::after{left:0;top:-14px}
+
+    .pop{
+      transform:scale(1.6);opacity:0;transition:transform 220ms ease-out, opacity 220ms linear;
+    }
+
+    /* HUD */
+    .hud{color:white;display:flex;gap:12px;align-items:center}
+    .stat{background:rgba(255,255,255,0.03);padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.06)}
+    .footer{font-size:0.85rem;color:rgba(255,255,255,0.9);margin-top:8px;text-align:center}
+
+    /* small responsive tweaks */
+    @media (max-width:520px){.heart{width:36px;height:32px}.heart .shape{width:22px;height:22px}.game{padding:10px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="bg" id="bg"></div>
+
+    <div class="game" id="game">
+      <header>
+        <h1 id="txt">💘 Love Catch</h1>
+        <div class="controls">
+          <div class="hud">
+            <div class="stat">Score: <strong id="score">0</strong></div>
+            <div class="stat">Lives: <strong id="lives">5</strong></div>
+            <div class="stat">Time: <strong id="time">60</strong>s</div>
+          </div>
+          <button class="btn" id="restart">Restart</button>
+        </div>
+      </header>
+
+      <main class="stage" id="stage" aria-label="game stage">
+        <!-- hearts will be spawned here -->
+      </main>
+
+      <div class="footer">Click or tap hearts to catch them. Miss too many and the game is over. Press <strong>R</strong> to restart.</div>
+    </div>
+  </div>
+
+  <script>
+
+
+const params = new URLSearchParams(window.location.search);
+    const name = params.get("name");
+    const text = document.getElementById("txt");
+
+    if (name) {
+      text.textContent = `Hello ${name} ❤️, Check yout Love`;
+    }
+
+     // Update nav links to pass the name parameter
+     document.querySelectorAll('.nav-btn').forEach(btn => {
+        if (!btn.href.includes('game.htm')) {
+          const url = new URL(btn.href);
+          url.searchParams.set('name', name);
+          btn.href = url.toString();
+        }
+      });
+    
+
+
+    // Game settings
+    const GAME_TIME = 60; // seconds
+    const SPAWN_INTERVAL = 1000; // ms
+    const MAX_HEARTS = 14;
+
+    const stage = document.getElementById('stage');
+    const scoreEl = document.getElementById('score');
+    const livesEl = document.getElementById('lives');
+    const timeEl = document.getElementById('time');
+    const restartBtn = document.getElementById('restart');
+    const bgEl = document.getElementById('bg');
+
+    let score = 0, lives = 5, timeLeft = GAME_TIME;
+    let hearts = new Map(); // id -> element
+    let spawnTimer = null, gameTimer = null, animLoop = null;
+    let nextId = 1; let lastTime = 0;
+
+    // background color palette and JS-driven subtle changes
+    const palette = [
+      ['#ff9a9e','#fad0c4'],
+      ['#a18cd1','#fbc2eb'],
+      ['#fbc2eb','#a6c1ee'],
+      ['#f6d365','#fda085'],
+      ['#ffecd2','#fcb69f'],
+      ['#cfd9df','#e2ebf0']
+    ];
+    let palIndex = 0;
+    function nudgeBg(){
+      palIndex = (palIndex+1) % palette.length;
+      const [a,b] = palette[palIndex];
+      bgEl.style.background = `linear-gradient(135deg, ${a}, ${b})`;
+    }
+    setInterval(nudgeBg, 2200); // gentle shift every 2.2s
+
+    // create a heart DOM node
+    function createHeart(x, y, speed){
+      const id = nextId++;
+      const el = document.createElement('div');
+      el.className = 'heart';
+      el.style.left = x + 'px';
+      el.style.top = y + 'px';
+      el.dataset.id = id;
+      el.dataset.vy = speed; // px per second (negative = up, positive = down)
+
+      const inner = document.createElement('div');
+      inner.className = 'shape';
+      el.appendChild(inner);
+
+      el.addEventListener('pointerdown', popHeart);
+      stage.appendChild(el);
+      hearts.set(id, el);
+      return el;
+    }
+
+    function spawnHeart(){
+      if(hearts.size >= MAX_HEARTS) return;
+      const rect = stage.getBoundingClientRect();
+      // spawn near bottom with random horizontal position
+      const x = Math.random() * rect.width;
+      const y = rect.height + 40; // below view
+      const upSpeed = - (60 + Math.random()*140); // px per second upwards
+      createHeart(x,y,upSpeed);
+    }
+
+    function popHeart(e){
+      const el = e.currentTarget;
+      const id = Number(el.dataset.id);
+      if(!hearts.has(id)) return;
+      // visual pop
+      el.classList.add('pop');
+      el.removeEventListener('pointerdown', popHeart);
+
+      score += 1;
+      scoreEl.textContent = score;
+
+      // small particle effect using clones
+      for(let i=0;i<6;i++){
+        const p = document.createElement('div');
+        p.className = 'heart';
+        p.style.left = el.style.left; p.style.top = el.style.top;
+        p.style.width = (8+Math.random()*8)+'px'; p.style.height = (8+Math.random()*8)+'px';
+        p.querySelector?.('div')
+        const shape = document.createElement('div'); shape.className='shape'; shape.style.width='100%'; shape.style.height='100%';
+        p.appendChild(shape);
+        stage.appendChild(p);
+        // animate out
+        const dx = (Math.random()-0.5)*160; const dy = - (60 + Math.random()*160);
+        p.animate([
+          {transform:'translate(-50%,-50%) scale(1)', opacity:1},
+          {transform:`translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0.1)`, opacity:0}
+        ],{duration:420+Math.random()*380, easing:'cubic-bezier(.2,.8,.2,1)'}).onfinish = ()=>p.remove();
+      }
+
+      // remove main heart after pop animation
+      setTimeout(()=>{
+        removeHeart(id);
+      },220);
+    }
+
+    function removeHeart(id){
+      const el = hearts.get(id);
+      if(!el) return;
+      el.remove(); hearts.delete(id);
+    }
+
+    // animation loop to move hearts
+    function animateStep(ts){
+      if(!lastTime) lastTime = ts; const dt = (ts-lastTime)/1000; lastTime = ts;
+      hearts.forEach((el, id) =>{
+        let vy = Number(el.dataset.vy);
+        // position as px
+        const left = parseFloat(el.style.left);
+        let top = parseFloat(el.style.top);
+        top += vy * dt;
+        // slight horizontal sway
+        const sway = Math.sin((ts + id*123)/500) * 8 * dt * 60;
+        el.style.top = top + 'px';
+        el.style.left = (left + sway) + 'px';
+
+        // when heart goes above the top (caught by missing) - decrease life
+        if(top < -40){
+          removeHeart(id);
+          lives -= 1; livesEl.textContent = lives;
+          if(lives <= 0){
+            endGame();
+          }
+        }
+      });
+
+      animLoop = requestAnimationFrame(animateStep);
+    }
+
+    // timers
+    function startTimers(){
+      spawnTimer = setInterval(spawnHeart, SPAWN_INTERVAL);
+      gameTimer = setInterval(()=>{
+        timeLeft -= 1; timeEl.textContent = timeLeft;
+        if(timeLeft <= 0) endGame();
+      }, 1000);
+      animLoop = requestAnimationFrame(animateStep);
+    }
+
+    function stopTimers(){
+      clearInterval(spawnTimer); spawnTimer = null;
+      clearInterval(gameTimer); gameTimer = null;
+      cancelAnimationFrame(animLoop); animLoop = null;
+      lastTime = 0;
+    }
+
+    function resetGame(){
+      stopTimers(); hearts.forEach((el,id)=>el.remove()); hearts.clear();
+      score=0; lives=5; timeLeft = GAME_TIME; scoreEl.textContent=score; livesEl.textContent=lives; timeEl.textContent=timeLeft;
+      nextId = 1; startTimers();
+    }
+
+    function endGame(){
+      stopTimers();
+      // clear remaining hearts
+      hearts.forEach((el,id)=>el.remove()); hearts.clear();
+      // show an overlay message
+      const ov = document.createElement('div');
+      ov.style.position='absolute';ov.style.inset='0';ov.style.display='flex';ov.style.alignItems='center';ov.style.justifyContent='center';ov.style.zIndex=9;
+      ov.innerHTML = `<div style="background:rgba(0,0,0,0.55);backdrop-filter: blur(4px);padding:22px;border-radius:12px;color:white;text-align:center;max-width:86%;">\n        <h2 style=\"margin:0 0 8px 0\">${score >= 30 ? 'You are loved! 💖' : 'Game Over 💔'}</h2>\n        <p style=\"margin:0 0 16px 0\">Score: <strong>${score}</strong></p>\n        <button id=\"playAgain\" style=\"padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:white;cursor:pointer\">Play Again</button>\n      </div>`;
+      document.getElementById('game').appendChild(ov);
+      document.getElementById('playAgain').addEventListener('click', ()=>{ov.remove(); resetGame();});
+    }
+
+    // keyboard shortcut
+    window.addEventListener('keydown', (e)=>{ if(e.key.toLowerCase()==='r'){ resetGame(); }});
+    restartBtn.addEventListener('click', resetGame);
+
+    // start
+    resetGame();
+
+    // friendly mobile handling: prevent page scroll while interacting with stage
+    stage.addEventListener('touchmove', (e)=>{ e.preventDefault(); }, {passive:false});
+
+    // small accessibility: allow keyboard click on hearts if focused
+    stage.addEventListener('click', (ev)=>{
+      // clicking empty space does nothing
+    });
+
+  </script>
+</body>
+</html>
