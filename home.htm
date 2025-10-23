@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" href="./fav.svg" type="image/x-icon">
+  <title>A Special Message Awaits 💝</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&display=swap"
+    rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(-45deg, #ff6b9d, #c44569, #ffc3a0, #ff677d, #d4a5a5);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      position: relative;
+    }
+
+    @keyframes gradientShift {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    .container {
+      text-align: center;
+      z-index: 10;
+      animation: fadeInUp 1.5s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .heart-icon {
+      font-size: 5rem;
+      animation: heartbeat 1.5s ease-in-out infinite;
+      margin-bottom: 20px;
+      filter: drop-shadow(0 0 20px rgba(255, 107, 157, 0.8));
+    }
+
+    @keyframes heartbeat {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      10%,
+      30% {
+        transform: scale(1.1);
+      }
+
+      20%,
+      40% {
+        transform: scale(1.05);
+      }
+    }
+
+    h1 {
+      font-family: 'Great Vibes', cursive;
+      font-size: 4.5rem;
+      color: white;
+      text-shadow: 0 0 20px rgba(255, 107, 157, 0.8),
+        0 0 40px rgba(255, 107, 157, 0.5),
+        3px 3px 10px rgba(0, 0, 0, 0.3);
+      margin-bottom: 20px;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      0% {
+        text-shadow: 0 0 20px rgba(255, 107, 157, 0.8), 0 0 40px rgba(255, 107, 157, 0.5), 3px 3px 10px rgba(0, 0, 0, 0.3);
+      }
+
+      100% {
+        text-shadow: 0 0 30px rgba(255, 107, 157, 1), 0 0 60px rgba(255, 107, 157, 0.7), 3px 3px 10px rgba(0, 0, 0, 0.3);
+      }
+    }
+
+    .subtitle {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: rgba(255, 255, 255, 0.95);
+      margin-bottom: 40px;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
+      letter-spacing: 1px;
+    }
+
+    #enterButton {
+      padding: 20px 50px;
+      font-size: 1.3rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+      color: white;
+      border: 3px solid rgba(255, 255, 255, 0.5);
+      border-radius: 50px;
+      box-shadow: 0 10px 40px rgba(255, 107, 157, 0.5),
+        0 0 20px rgba(255, 255, 255, 0.3),
+        inset 0 1px 3px rgba(255, 255, 255, 0.4);
+      transition: all 0.3s ease;
+      font-family: 'Poppins', sans-serif;
+      letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #enterButton::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    #enterButton:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    #enterButton:hover {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 15px 50px rgba(255, 107, 157, 0.7),
+        0 0 30px rgba(255, 255, 255, 0.5),
+        inset 0 1px 3px rgba(255, 255, 255, 0.6);
+      border-color: white;
+    }
+
+    #enterButton:active {
+      transform: translateY(-2px) scale(1.02);
+    }
+
+    .button-text {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Floating hearts */
+    .floating-heart {
+      position: absolute;
+      font-size: 2rem;
+      animation: float 8s infinite ease-in-out;
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 0.7;
+      }
+
+      90% {
+        opacity: 0.7;
+      }
+
+      100% {
+        transform: translateY(-100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* Rose petals */
+    .petal {
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+      border-radius: 50% 0 50% 50%;
+      opacity: 0.6;
+      animation: petalFall 10s infinite ease-in;
+    }
+
+    @keyframes petalFall {
+      0% {
+        transform: translateY(-10vh) rotate(0deg);
+        opacity: 0.8;
+      }
+
+      100% {
+        transform: translateY(110vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    /* Sparkles */
+    .sparkle {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: white;
+      border-radius: 50%;
+      box-shadow: 0 0 10px white;
+      animation: sparkleAnim 3s infinite ease-in-out;
+    }
+
+    @keyframes sparkleAnim {
+
+      0%,
+      100% {
+        opacity: 0;
+        transform: scale(0);
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 3rem;
+      }
+
+      .subtitle {
+        font-size: 1.2rem;
+      }
+
+      #enterButton {
+        padding: 15px 35px;
+        font-size: 1.1rem;
+      }
+
+      .heart-icon {
+        font-size: 3.5rem;
+      }
+    }
+
+    /* Popup Overlay */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 192, 203, 0.3);
+      backdrop-filter: blur(8px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 20;
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+     /* Popup Card */
+    .popup-card {
+      background: linear-gradient(145deg, #ffe0eb, #ffd1e1);
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(255, 107, 157, 0.5);
+      animation: popIn 0.6s ease;
+      border: 2px solid white;
+    }
+
+     @keyframes popIn {
+      0% {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .popup-card h2 {
+      font-family: 'Great Vibes', cursive;
+      color: #c44569;
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+    }
+
+    .popup-card p {
+      color: #444;
+      font-family: 'Poppins', sans-serif;
+      margin-bottom: 20px;
+    }
+
+    .popup-card input {
+      padding: 12px 20px;
+      border-radius: 30px;
+      border: none;
+      outline: none;
+      width: 80%;
+      font-size: 1rem;
+      text-align: center;
+      margin-bottom: 25px;
+      box-shadow: 0 0 15px rgba(255, 107, 157, 0.3);
+    }
+
+    .popup-card button {
+      background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+      border: none;
+      color: white;
+      padding: 12px 30px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 20px rgba(255, 107, 157, 0.5);
+    }
+
+    .popup-card button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px rgba(255, 107, 157, 0.6);
+    }
+
+     .close-btn {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      font-size: 1.8rem;
+      color: #c44569;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .close-btn:hover {
+      transform: scale(1.2);
+    }
+
+    @media (max-width: 768px) {
+      .popup-card {
+        width: 85%;
+        padding: 30px;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="heart-icon">💝</div>
+    <h1>Something Special Awaits...</h1>
+    <p class="subtitle">A message crafted with love, just for someone special</p>
+    <button id="enterButton">
+      <span class="button-text">✨ Unlock The Magic ✨</span>
+    </button>
+  </div>
+
+   <!-- Popup Overlay -->
+  <div class="overlay" id="popupOverlay">
+    <div class="popup-card">
+      <div class="close-btn" id="closePopup">×</div>
+      <h2>💌 Enter Their Name</h2>
+      <p>Who is this magical message for?</p>
+      <input type="text" id="nameInput" placeholder="Type their name here... 💖" />
+      <br>
+      <button id="continueButton">Continue 💌</button>
+    </div>
+  </div>
+
+  <script>
+    // Create floating hearts
+    function createFloatingHeart() {
+      const heart = document.createElement('div');
+      heart.className = 'floating-heart';
+      heart.textContent = ['💕', '💖', '💗', '💓', '💝'][Math.floor(Math.random() * 5)];
+      heart.style.left = Math.random() * 100 + 'vw';
+      heart.style.animationDelay = Math.random() * 3 + 's';
+      heart.style.animationDuration = (6 + Math.random() * 4) + 's';
+      document.body.appendChild(heart);
+
+      setTimeout(() => heart.remove(), 10000);
+    }
+
+    // Create rose petals
+    function createPetal() {
+      const petal = document.createElement('div');
+      petal.className = 'petal';
+      petal.style.left = Math.random() * 100 + 'vw';
+      petal.style.animationDelay = Math.random() * 5 + 's';
+      petal.style.animationDuration = (8 + Math.random() * 4) + 's';
+      document.body.appendChild(petal);
+
+      setTimeout(() => petal.remove(), 12000);
+    }
+
+    // Create sparkles
+    function createSparkle() {
+      const sparkle = document.createElement('div');
+      sparkle.className = 'sparkle';
+      sparkle.style.top = Math.random() * 100 + 'vh';
+      sparkle.style.left = Math.random() * 100 + 'vw';
+      sparkle.style.animationDelay = Math.random() * 2 + 's';
+      document.body.appendChild(sparkle);
+
+      setTimeout(() => sparkle.remove(), 3000);
+    }
+
+    // Generate effects
+    setInterval(createFloatingHeart, 800);
+    setInterval(createPetal, 600);
+    setInterval(createSparkle, 400);
+
+    const overlay = document.getElementById('popupOverlay');
+    const openBtn = document.getElementById('enterButton');
+    const closeBtn = document.getElementById('closePopup');
+    const continueBtn = document.getElementById('continueButton');
+    const nameInput = document.getElementById('nameInput');
+
+    openBtn.addEventListener('click', () => {
+      overlay.style.display = 'flex';
+    });
+
+    closeBtn.addEventListener('click', () => {
+      overlay.style.display = 'none';
+    });
+
+    continueBtn.addEventListener('click', () => {
+      const name = nameInput.value.trim();
+      if (name) {
+        window.location.href = `page2.htm?name=${encodeURIComponent(name)}`;
+      } else {
+        nameInput.placeholder = "Please enter a name 💞";
+      }
+    });
+  </script>
+
+</body>
+
+</html>
